@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
+import EditorLoader from "@/components/editor/EditorLoader";
+
+export const metadata: Metadata = { title: "Video editor · evaedits" };
+
 export default function EditorPage() {
-  return (
-    <main className="flex min-h-dvh items-center justify-center p-4">
-      <p className="text-neutral-500">Video editor coming soon.</p>
-    </main>
-  );
+  return <EditorLoader />;
 }
