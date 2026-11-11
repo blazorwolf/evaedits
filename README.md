@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# evaedits
 
-## Getting Started
+One app. Every creative tool. From inspiration to final post.
 
-First, run the development server:
+This is the prototype, starting with the short-form video editor (Reels, TikToks, Stories).
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install      # also copies the ffmpeg.wasm cores into public/ffmpeg
+npm run dev      # http://localhost:3000/editor
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What the editor does today
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Import several videos at once from the camera roll or files
+- Timeline: tap a clip to select it and move the playhead, long-press (phone) or drag (desktop) to reorder
+- Trim by dragging the yellow handles, split at the playhead, delete, undo
+- Speed per clip from 0.25× to 4×
+- Straight cut or fade between any two clips (tap the dot between them)
+- **Cut pauses**: finds silence in the selected clip and removes it
+- Autosave: the project and its videos are kept in the browser (IndexedDB), so a refresh picks up where you left off
+- Export a vertical 9:16 MP4 (1080×1920 or 720×1280), cropped to fill the frame, with Download and Share on phones
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Desktop shortcuts: Space play/pause, S split, Delete remove, Ctrl/Cmd+Z undo.
 
-## Learn More
+## How it works
 
-To learn more about Next.js, take a look at the following resources:
+Everything runs in the browser. Video processing (silence detection, export) uses
+[ffmpeg.wasm](https://ffmpegwasm.netlify.app/). The multithreaded build needs
+`SharedArrayBuffer`, so `next.config.ts` sends cross-origin isolation headers
+(COOP/COEP) on every route. ffmpeg's core and worker files are served from
+`public/ffmpeg` (copied by `scripts/copy-ffmpeg.mjs`, not committed).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Debug flags for the editor URL: `?st` forces the single-threaded ffmpeg core, `?debug` logs ffmpeg output to the console.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Known limits
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Speed is constant per clip; speed ramps are not built yet.
+- Export runs on the device, so long or 1080p exports on older phones are slow. 720p is faster.
+- Formats the browser can't play (for example HEVC .mov in some desktop browsers) can't be imported yet.
